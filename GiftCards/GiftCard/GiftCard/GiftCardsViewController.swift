@@ -26,7 +26,7 @@ class GiftCardsViewController: UICollectionViewController {
     }
     
     func getGiftCardData() {
-        var giftCardsData : [GiftCard]?
+        var giftCardsData : [GiftCard]!
         let accessToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJTSEEyNTYifQ==.dWxoWjJUbjlybTZzT0hHWk83Q082dWR4YTZXVlEvVWJUbzdnMzNoQzJ0dEVhbFVtaFo3cHA5SmxPcVEwM0JIUVZqQk5COVVQNVpzV242T01NZFU5ZEgvRE1BK2IrNzJTckd5ZWVmMTFsZGVGSjZIK05ySEF5a09oSm9XOWtPdnc=.oE9jN2HT4WmtSKyCU5rdQNf1y/NXQvt3iN+3mEr1i9I="
         let url = NSURL(string: "https://testbedapp.giftbit.com/papi/v1/marketplace?limit=100")!
         let request = NSMutableURLRequest(URL: url)
@@ -38,7 +38,6 @@ class GiftCardsViewController: UICollectionViewController {
             if let response = response, data = data {
                 print(response)
                 giftCardsData = self.parseJsonData(data)
-                //print(giftCardsData)
             } else {
                 print(error)
             }
@@ -48,33 +47,22 @@ class GiftCardsViewController: UICollectionViewController {
     }
     
     func parseJsonData(data: NSData) -> [GiftCard] {
-        var giftCardsArray : [GiftCard]?
-        var giftCard : GiftCard?
-        let jsonObject : [String: AnyObject]
+        var giftCardsArray : [GiftCard] = Array()
+        var jsonObject : [String: AnyObject]!
 
         do {
             jsonObject = try NSJSONSerialization.JSONObjectWithData(data, options: []) as! [String: AnyObject];
-            if let cardsArray = jsonObject["marketplace_gifts"] as? NSArray {
-                for cardObj in cardsArray {
-                    let card = cardObj as AnyObject
-                    if let cardImageURL  = card["image_url"] as? String {
-                        giftCard?.vendorName = cardImageURL
-                    }
-                    if let cardName  = card["name"] as? String {
-                        giftCard?.vendorName = cardName
-                    }
-                    print(card)
-                    giftCardsArray?.append(giftCard!)
-                    print(giftCardsArray)
-                }
-                
-            }
         } catch let error as NSError {
             print("Failed to load: \(error.localizedDescription)")
         }
 
-
-        return giftCardsArray!
+        if let cardsArray = jsonObject["marketplace_gifts"] as? [[String: AnyObject]] {
+            for card in cardsArray {
+                let giftCard : GiftCard = GiftCard.init(dict: card)!
+                giftCardsArray.append(giftCard)
+            }
+        }
+        return giftCardsArray
     }
     
 
